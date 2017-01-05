@@ -8,6 +8,8 @@ Author: Nikhil Parihar
 */
 
 
+
+
 add_action( 'add_meta_boxes', 'contributer_checkboxes' );
 function contributer_checkboxes() {
     add_meta_box(
@@ -19,32 +21,41 @@ function contributer_checkboxes() {
         'default'      // priority of the box
     );
 }
-
+ 
 // display the metabox
 function  contributer_box_content( $post_id ) {
     // nonce field for security check, you can have the same
     // nonce field for all your meta boxes of same plugin
-wp_nonce_field( plugin_basename( __FILE__ ), 'contributer-plug_nonce' );
-$meta = get_post_meta( get_the_ID() );
-
-//echo '<pre>';print_r($meta);die;
-   $users = get_users();
-	  
-	foreach ($users as $user) {     
-	$cont_id=explode(",",$meta['contributer'][0]);
-	//echo '<pre>';print_r($cont_id);die;
-	$sel='';
-	foreach($cont_id as $cid ){
-		if($cid==$user->ID){
-			$sel="checked";
-			}
-		}
-    echo '<div class="checkbox"><input type="checkbox" name="ids[]"  class="" value="'.$user->ID.'" '.$sel.' />'.$user->display_name .'<br />
-	<input type="hidden" name="ids_on_page[]" value="'.$user->ID.'"/></div>';
+	wp_nonce_field( plugin_basename( __FILE__ ), 'contributer-plug_nonce' );
+	$meta = get_post_meta( get_the_ID() );
 	
-	 }
+	
+	$metas = get_post( get_the_ID() );
 
-}
+    $main_author = $metas->post_author;
+    $users = get_users();
+	 //echo '<pre>';print_r($users);
+	 	
+	foreach ($users as $user) { 
+		$user_meta=get_userdata($user->ID);
+		$user_roles=$user_meta->roles; 
+			if (!in_array("subscriber", $user_roles)){  
+		     $cont_id=explode(",",$meta['contributer'][0]);
+		//echo '<pre>';print_r($cont_id);die;
+		      $sel='';$dis="";
+	   foreach($cont_id as $cid ){
+		  if($main_author==$user->ID && $cid==$main_author ){
+		      $sel="checked"; $dis="disabled"; }
+		 if($cid==$user->ID ){
+			  $sel="checked"; }
+			}
+		 echo '<div class="checkbox"><input type="checkbox" name="ids[]"  class="" value="'.$user->ID.'" '.$sel.' '.$dis.' />'.$user->display_name .' ('.$user->user_nicename.')<br />
+	<input type="hidden" name="ids_on_page[]" value="'.$user->ID.'"/></div>';
+       	}
+     }
+ }
+
+
 
 
 // save data from checkboxes
