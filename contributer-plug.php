@@ -112,4 +112,13 @@ function my_the_content_filter($content) {
 }
 
 add_filter( 'the_content', 'my_the_content_filter', 20 );
+
+function plugin_deactivation()
+{ 
+    delete_post_meta_by_key( 'contributer' ); 
+    flush_rewrite_rules();
+}
+register_uninstall_hook( __FILE__, 'plugin_deactivation' );
+
+?>
 ?>
